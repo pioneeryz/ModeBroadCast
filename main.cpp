@@ -29,7 +29,7 @@ int QuerySQL(string DbName,string sql){
    sqlite3 *db;
 
    char *errmsg=NULL;
-   char **dbResult; //ÊÇ char ** ÀàĞÍ£¬Á½¸ö*ºÅ
+   char **dbResult; //æ˜¯ char ** ç±»å‹ï¼Œä¸¤ä¸ª*å·
    int nRow, nColumn;
 
    int rc;
@@ -44,10 +44,10 @@ int QuerySQL(string DbName,string sql){
    rc=sqlite3_get_table(db,sql.c_str(),&dbResult, &nRow, &nColumn, &errmsg);
    if(rc==SUCCESS){
         index=nColumn;
-        printf("²éÑ¯µ½%dÌõ¼ÇÂ¼\n",nRow);
+        printf("æŸ¥è¯¢åˆ°%dæ¡è®°å½•\n",nRow);
         count=nRow;
         for(int i=0;i<nRow;i++){
-            printf("µÚ%dÌõ¼ÇÂ¼\n",i+1);
+            printf("ç¬¬%dæ¡è®°å½•\n",i+1);
             for(int j=0;j<nColumn;j++){
                 printf("%s = %s\n",dbResult[j],dbResult[index]);
                 if(j==0){
@@ -73,7 +73,7 @@ int QuerySQL(string DbName,string sql){
 int ExcuteSQL(string DbName,string sql){
    sqlite3 *db;
    char *zErrMsg = 0;
-   char **dbResult; //ÊÇ char ** ÀàĞÍ£¬Á½¸ö*ºÅ
+   char **dbResult; //æ˜¯ char ** ç±»å‹ï¼Œä¸¤ä¸ª*å·
    int nRow, nColumn;
 
    int rc;
@@ -128,19 +128,19 @@ int main()
     unsigned char msg[1024]={0x30,0x30,0x30,0x31,0x30,0x34,0x32,0x33,0x30,0x30,0x30,0x31,
                              0x32,0x30,0x31,0x36,0x31,0x32,0x31,0x39,0x31,0x34,0x31,0x34,
                              0x32,0x34,0x31,0x35,0x31};
-// µ¥¸öÄ£Ê½¹ã²¥
-//30 30 30 31    ¼ÇÂ¼Êı
-//30 34 32 33    ½µ¼¶Ä£Ê½ÏßÂ·³µÕ¾ID
-//30 30 30 31    ¼ÇÂ¼Êı
-//32 30 31 36 31 32 31 39 31 34 31 34 32 34  ·¢ÆğÊ±¼ä
-//31 35  ½µ¼¶ÔËÓªÄ£Ê½ID
-//31  ½µ¼¶ÔËÓªÄ£Ê½¿ª¹Ø
+// å•ä¸ªæ¨¡å¼å¹¿æ’­
+//30 30 30 31    è®°å½•æ•°
+//30 34 32 33    é™çº§æ¨¡å¼çº¿è·¯è½¦ç«™ID
+//30 30 30 31    è®°å½•æ•°
+//32 30 31 36 31 32 31 39 31 34 31 34 32 34  å‘èµ·æ—¶é—´
+//31 35  é™çº§è¿è¥æ¨¡å¼ID
+//31  é™çº§è¿è¥æ¨¡å¼å¼€å…³
 
     memcpy(tmp,&msg[26],2);
     modeID=atoi(tmp);
     cout<<"modeID:"<<modeID<<endl;
     flag=msg[28]-0x30;
-    if(flag){//1  Ä£Ê½´ò¿ª
+    if(flag){//1  æ¨¡å¼æ‰“å¼€
         memcpy(ModeStart,&msg[12],14);
         memset(ModeEnd,0x30,14);
     }else{
@@ -164,12 +164,12 @@ int main()
     string tmp_end_time;
     string tmp_modeid;
     while(1){
-        cout<<"************ÌáÊ¾************"<<endl;
-        cout<<"*1.½¨±í"<<endl;
-        cout<<"*2.²åÈëÊı¾İ"<<endl;
-        cout<<"*3.²éÑ¯"<<endl;
-        cout<<"*4.ĞŞ¸Ä"<<endl;
-        cout<<"*5.É¾³ı"<<endl;
+        cout<<"************æç¤º************"<<endl;
+        cout<<"*1.å»ºè¡¨"<<endl;
+        cout<<"*2.æ’å…¥æ•°æ®"<<endl;
+        cout<<"*3.æŸ¥è¯¢"<<endl;
+        cout<<"*4.ä¿®æ”¹"<<endl;
+        cout<<"*5.åˆ é™¤"<<endl;
         cout<<"****************************"<<endl;
         cout<<"Please input:";
         cin>>input;
