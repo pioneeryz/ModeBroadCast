@@ -7,11 +7,18 @@
 #define ERROR   -1
 using namespace std;
 typedef struct{
+    string stationId;
     string modeId;
     string start_time;
     string end_time;
 }ModeBroadCast;
-ModeBroadCast m_ModeBroadCast[10];
+
+typedef struct{
+    string station_id;
+}StationID;
+
+ModeBroadCast m_ModeBroadCast[100];
+StationID m_StationID[100];
 int count;
 static int callback(void *NotUsed, int argc, char **argv, char **azColName){
    int i;
@@ -19,8 +26,8 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName){
    for(i=0; i<argc; i++){
       printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
       //cout<<argv[i]<<"  ";
-
    }
+
    printf("\n");
    return 0;
 }
@@ -31,7 +38,6 @@ int QuerySQL(string DbName,string sql){
    char *errmsg=NULL;
    char **dbResult; //是 char ** 类型，两个*号
    int nRow, nColumn;
-
    int rc;
    int index;
    rc = sqlite3_open((const char *)DbName.c_str(), &db);
@@ -51,19 +57,24 @@ int QuerySQL(string DbName,string sql){
             for(int j=0;j<nColumn;j++){
                 printf("%s = %s\n",dbResult[j],dbResult[index]);
                 if(j==0){
-                    m_ModeBroadCast[i].modeId=dbResult[index];
+                    m_ModeBroadCast[i].stationId=dbResult[index];
                 }
                 if(j==1){
-                    m_ModeBroadCast[i].start_time=dbResult[index];
+                    m_ModeBroadCast[i].modeId=dbResult[index];
                 }
                 if(j==2){
+                    m_ModeBroadCast[i].start_time=dbResult[index];
+                }
+                if(j==3){
                     m_ModeBroadCast[i].end_time=dbResult[index];
-
                 }
                 ++index;
             }
             printf("----------\n");
         }
+   }else{
+       printf("查询失败...\n");
+
    }
    sqlite3_free_table(dbResult);
    sqlite3_close(db);
@@ -86,11 +97,11 @@ int ExcuteSQL(string DbName,string sql){
       fprintf(stderr, "Opened database successfully\n");
    }
 
-   rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+   rc = sqlite3_exec(db, sql.c_str(), 0, 0, &zErrMsg);
 
 
    if( rc != SQLITE_OK ){
-   fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
    }else{
       fprintf(stdout, "SQL successfully\n");
@@ -99,6 +110,7 @@ int ExcuteSQL(string DbName,string sql){
    sqlite3_close(db);
    return 0;
 }
+
 void init(){
     unsigned char msg[1024]={0};
 }
@@ -157,13 +169,20 @@ int main()
         printf("%02X",aa[i]);
     }
     cout<<endl;
-    string m_DbName="test1.db";
+    string m_DbName="D://test1.db";
     string sql="";
     string sql_format="";
     char sql_tmp[1024]={0};
     string tmp_end_time;
+    string tmp_stationid;
     string tmp_modeid;
+    //unsigned int ModeStationNum = 1;
+    //unsigned int ModeNum[100]={0};
+    //memset(ModeNum,1,sizeof(ModeNum));
     while(1){
+
+        unsigned int ModeStationNum = 1;
+        unsigned int ModeNum[100]={0};
         cout<<"************提示************"<<endl;
         cout<<"*1.建表"<<endl;
         cout<<"*2.插入数据"<<endl;
@@ -176,29 +195,47 @@ int main()
         switch(input){
             case 1:
                 sql = "CREATE TABLE MODECAST("  \
-                      "MODEID     TEXT       NOT NULL," \
+                      "STATION_ID  TEXT       NOT NULL,"\
+                      "MODE_ID     TEXT       NOT NULL," \
                       "START_TIME       TEXT    NOT NULL," \
                       "END_TIME         TEXT     NOT NULL);";
                       ExcuteSQL(m_DbName,sql);
                 break;
             case 2:
 
-                sql ="INSERT INTO MODECAST(MODEID,START_TIME,END_TIME) "  \
-                    "VALUES ('14','20190321134000','00000000000000'); " \
-                    "INSERT INTO MODECAST(MODEID,START_TIME,END_TIME) "  \
-                    "VALUES ('15','20190321094000','00000000000000'); " \
-                    "INSERT INTO MODECAST (MODEID,START_TIME,END_TIME) "  \
-                    "VALUES ('15','00000000000000','20190321103000'); "     \
-                    "INSERT INTO MODECAST(MODEID,START_TIME,END_TIME) "  \
-                    "VALUES ('03','20190319063000','00000000000000'); " \
-                    "INSERT INTO MODECAST (MODEID,START_TIME,END_TIME) "  \
-                    "VALUES ('03','00000000000000','20190319073000'); " \
-                    "INSERT INTO MODECAST(MODEID,START_TIME,END_TIME)" \
-                    "VALUES ('03','20190319120000','20190319130000');" \
-                    "INSERT INTO MODECAST(MODEID,START_TIME,END_TIME)" \
-                    "VALUES ('11','20190320120000','00000000000000');" \
-                    "INSERT INTO MODECAST (MODEID,START_TIME,END_TIME)" \
-                    "VALUES ('11','00000000000000','20190320150000');";
+                sql =
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0422','03','20190323100000','00000000000000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0422','03','00000000000000','20190322120000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0422','15','20190323150000','00000000000000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0422','15','00000000000000','20190322160000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0421','13','20190322154000','00000000000000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0421','13','00000000000000','20190322164000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0421','03','20190322134000','00000000000000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0421','03','00000000000000','20190322144000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0420','14','20190321134000','00000000000000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0420','15','20190321094000','00000000000000'); " \
+                    "INSERT INTO MODECAST (STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0420','15','00000000000000','20190321103000'); "     \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0420','03','20190319063000','00000000000000'); " \
+                    "INSERT INTO MODECAST (STATION_ID,MODE_ID,START_TIME,END_TIME) "\
+                    "VALUES ('0420','03','00000000000000','20190319073000'); " \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME)"\
+                    "VALUES ('0420','03','20190319120000','20190319130000');" \
+                    "INSERT INTO MODECAST(STATION_ID,MODE_ID,START_TIME,END_TIME)"\
+                    "VALUES ('0420','11','20190320120000','00000000000000');" \
+                    "INSERT INTO MODECAST (STATION_ID,MODE_ID,START_TIME,END_TIME)"\
+                    "VALUES ('0420','11','00000000000000','20190320150000');";
                     ExcuteSQL(m_DbName,sql);
                 /*
                 sql = "INSERT INTO MODECAST(MODEID,START_TIME,END_TIME) "  \
@@ -209,43 +246,72 @@ int main()
                 */
                 break;
             case 3:
-                cout<<"MODEID    START_TIME    END_TIME"<<endl;
-                sql = "SELECT * from MODECAST ORDER BY MODEID ASC;";
+                cout<<"STATION_ID    MODE_ID    START_TIME    END_TIME"<<endl;
+                sql = "SELECT * from MODECAST ORDER BY STATION_ID,MODE_ID ASC;";
                 //sql = "SELECT * from MODECAST where START_TIME='00000000000000' or END_TIME='00000000000000';";
                 QuerySQL(m_DbName,sql);
                 cout<<"count:"<<count<<endl;
-                cout<<"MODEID    START_TIME    END_TIME"<<endl;
+                cout<<"STATION_ID    MODE_ID    START_TIME    END_TIME"<<endl;
                 for(int i=0;i<count;i++){
-                    cout<<m_ModeBroadCast[i].modeId<<"    "<<m_ModeBroadCast[i].start_time<<"    "<<m_ModeBroadCast[i].end_time<<endl;
+                    cout<<m_ModeBroadCast[i].stationId<<"    "<<m_ModeBroadCast[i].modeId<<"    "<<m_ModeBroadCast[i].start_time<<"    "<<m_ModeBroadCast[i].end_time<<endl;
                 }
-
 
                 break;
             case 4:
-                sql = "SELECT * from MODECAST where START_TIME='00000000000000' or END_TIME='00000000000000' ORDER BY MODEID ASC;";
+                sql = "SELECT * from MODECAST where START_TIME='00000000000000' or END_TIME='00000000000000' ORDER BY STATION_ID,MODE_ID ASC;";
                 QuerySQL(m_DbName,sql);
                 cout<<count<<endl;
-                sql_format = "UPDATE MODECAST set END_TIME=\'%s\' where MODEID=\'%s\' and END_TIME='00000000000000';";
+                sql_format = "UPDATE MODECAST set END_TIME=\'%s\' where STATION_ID=\'%s\' and MODE_ID=\'%s\' and END_TIME='00000000000000';";
                 if(count>=2){
                     for(int i=0;i<count;i++){
                         if(m_ModeBroadCast[i].start_time.compare("00000000000000")==0){
                             cout<<"i="<<i<<endl;
                             tmp_end_time=m_ModeBroadCast[i].end_time;
+                            tmp_stationid=m_ModeBroadCast[i].stationId;
                             tmp_modeid=m_ModeBroadCast[i].modeId;
-                            sql="DELETE FROM MODECAST WHERE MODEID='"+m_ModeBroadCast[i].modeId+"' and START_TIME='00000000000000';";
+                            sql="DELETE FROM MODECAST WHERE MODE_ID='"+m_ModeBroadCast[i].modeId+"' and START_TIME='00000000000000';";
                             cout<<sql<<endl;
                             ExcuteSQL(m_DbName,sql);
-                            sprintf(sql_tmp,sql_format.c_str(),tmp_end_time.c_str(),tmp_modeid.c_str());
+                            sprintf(sql_tmp,sql_format.c_str(),tmp_end_time.c_str(),tmp_stationid.c_str(),tmp_modeid.c_str());
                             cout<<"sql_tmp:"<<sql_tmp<<endl;
                             ExcuteSQL(m_DbName,string(sql_tmp));
+
                         }
                     }
                 }
-                QuerySQL(m_DbName,"SELECT * from MODECAST ORDER BY MODEID ASC;");
-                cout<<"MODEID    START_TIME    END_TIME"<<endl;
+                QuerySQL(m_DbName,"SELECT * from MODECAST ORDER BY STATION_ID,MODE_ID ASC;");
+                cout<<"STATION_ID    MODE_ID    START_TIME    END_TIME"<<endl;
                 for(int i=0;i<count;i++){
-                    cout<<m_ModeBroadCast[i].modeId<<"    "<<m_ModeBroadCast[i].start_time<<"    "<<m_ModeBroadCast[i].end_time<<endl;
+                    cout<<m_ModeBroadCast[i].stationId<<"    "<<m_ModeBroadCast[i].modeId<<"    "<<m_ModeBroadCast[i].start_time<<"    "<<m_ModeBroadCast[i].end_time<<endl;
                 }
+
+
+            cout<<"final count="<<count<<endl;
+            for(int k = 0 ; k < count; k++ )
+			{
+				//2019年3月21日修改
+				if(k>0){
+					if(m_ModeBroadCast[k].stationId.compare(m_ModeBroadCast[k-1].stationId)!=0){
+						ModeStationNum+=1;
+						ModeNum[ModeStationNum-1]+=1;
+						m_StationID[ModeStationNum-1].station_id=m_ModeBroadCast[k].stationId;
+					}
+					if(m_ModeBroadCast[k].stationId.compare(m_ModeBroadCast[k-1].stationId)==0){
+						ModeNum[ModeStationNum-1]+=1;
+						m_StationID[ModeStationNum-1].station_id=m_ModeBroadCast[k].stationId;
+					}
+				}else{
+				    ModeNum[ModeStationNum-1]+=1;
+				    m_StationID[ModeStationNum-1].station_id=m_ModeBroadCast[k].stationId;
+				}
+			}
+			cout<<"ModeStationNum:"<<ModeStationNum<<endl;
+			for(int m=0;m<ModeStationNum;m++){
+                cout<<"ModeNum["<<m<<"]="<<ModeNum[m]<<endl;
+			}
+            for(int m=0;m<ModeStationNum;m++){
+                cout<<"m_StationID["<<m<<"]="<<m_StationID[m].station_id<<endl;
+			}
 
                 //fprintf(sql_tmp,sql_format,)
                 //ExcuteSQL(m_DbName,sql);
@@ -254,6 +320,7 @@ int main()
                 sql = "DELETE from MODECAST;";
                 ExcuteSQL(m_DbName,sql);
                 break;
+
             default:
                 break;
         }
